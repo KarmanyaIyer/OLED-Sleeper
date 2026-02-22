@@ -1,9 +1,8 @@
 Just some personal modifcations to OLED Sleeper. I wanted to make it easier to toggle and I'm using this as a productivity tool (turning my second monitor off when using my main so it's not a distraction in my peripheral vision), thus I made some changes to make it faster and more convenient for that. Not intended for just preventing burn-in, but can be used for that as well I guess.
 
 Modifications:
-- Added hotkey to toggle sleeper feature (copilot button, win+shift+f23. Can be changed in line 240 of OLED-Sleeper.ahk)
+- Added hotkey to toggle sleeper feature (copilot button, win+shift+f23. Can be changed in line 239 of [OLED-Sleeper.ahk](src/OLED-Sleeper.ahk))
 - Made minutes into milliseconds
-- Made the dimming and brightening instant
 
 
 ============================================================================================

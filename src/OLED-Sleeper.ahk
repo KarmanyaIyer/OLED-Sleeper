@@ -255,15 +255,14 @@ CheckAllMonitors(*) {
                 screen['IsModified'] := false
                 ClearRestoreState(screen['ID'])
             }
-        }
-        MsgBox("OLED-Sleeper Paused.", "OLED-Sleeper", "T1")
+        TrayTip("OLED-Sleeper Paused", "OLED-Sleeper")
     } else {
         Log("Sleeper feature resumed by hotkey.")
         ; Reset activity times
         for screen in MonitoredScreens {
             screen['LastActiveTime'] := A_TickCount
         }
-        MsgBox("OLED-Sleeper Resumed.", "OLED-Sleeper", "T1")
+        TrayTip("OLED-Sleeper Resumed", "OLED-Sleeper")
     }
 }
 
@@ -277,7 +276,7 @@ CheckAllMonitors(*) {
 SetBrightness(monitorID, brightness) {
     global ControlTool
     cmd := Format('"{1}" /SetValue "{2}\Monitor0" 10 {3}', ControlTool, monitorID, brightness)
-    Run(cmd,, "Hide") ; Using Run instead of RunWait for near instant change
+    RunWait(cmd,, "Hide")
 }
 
 ; Gets the current brightness of a monitor
