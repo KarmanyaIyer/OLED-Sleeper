@@ -42,6 +42,7 @@ global CheckInterval := 50      ; Frequency (ms) to check each monitor's state
 
 ; === INTERNAL STATE ===
 global MonitoredScreens := []   ; List of monitor state maps for each target screen
+global isPaused := false        ; Tracks whether sleeper is paused by user
 
 
 ; ==============================================================================
@@ -235,8 +236,6 @@ CheckAllMonitors(*) {
 }
 
 ; HOTKEY TO TOGGLE SLEEPER
-global isPaused := false
-
 +#F23:: ; lenovo Copilot key to toggle pause/resume
 {
     global isPaused
