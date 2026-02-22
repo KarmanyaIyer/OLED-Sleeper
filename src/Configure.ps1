@@ -72,7 +72,6 @@ $dimmerEmoji = [System.Char]::ConvertFromUtf32(0x1F506)    # 🔆
 # --- Data Variables ---
 $managedMonitors = New-Object System.Collections.ArrayList
 $configuredMonitors = New-Object System.Collections.ArrayList
-$time_min = $null
 $time_ms = $null
 
 #=================================================================
@@ -111,7 +110,8 @@ try {
                 if ($m.Success) { $ahkExePath = $m.Groups[1].Value }
             }
         }
-    } catch {
+    }
+    catch {
         # swallow and fall back to PATH
     }
 
@@ -134,13 +134,14 @@ try {
     $exeName = [System.IO.Path]::GetFileName($ahkExePath)
 
     $looksLikeV2Alias =
-        $ahkExePath -like "*\Microsoft\WindowsApps\*" -and
-        ($exeName -ieq "AutoHotkeyV2.exe" -or $exeName -like "*v2*")
+    $ahkExePath -like "*\Microsoft\WindowsApps\*" -and
+    ($exeName -ieq "AutoHotkeyV2.exe" -or $exeName -like "*v2*")
 
     if ($versionInfo.ProductMajorPart -ne 2) {
         if ($looksLikeV2Alias -or [string]::IsNullOrWhiteSpace($versionInfo.ProductVersion)) {
             # Accept - we can't read version from the Store shim, but it is clearly the v2 launcher
-        } else {
+        }
+        else {
             throw "OLED-Sleeper requires AutoHotkey v2, but version $($versionInfo.ProductVersion) was found at `"$ahkExePath`"."
         }
     }
@@ -279,9 +280,9 @@ foreach ($monitor in $managedMonitors) {
     if ($action -eq '1') {
         # Store an object with both Name and Monitor ID
         $monitorInfo = [PSCustomObject]@{
-            Name = $monitor.Name
+            Name      = $monitor.Name
             MonitorID = $monitor.'Monitor ID'
-            Action = 'blackout'
+            Action    = 'blackout'
         }
         [void]$configuredMonitors.Add($monitorInfo)
         Write-Host "  -> " -ForegroundColor Gray -NoNewline
@@ -293,10 +294,10 @@ foreach ($monitor in $managedMonitors) {
             $dimLevelStr = Read-Host "   Enter brightness level (0-100)"
             if ([int]::TryParse($dimLevelStr, [ref]$dimLevel) -and $dimLevel -ge 0 -and $dimLevel -le 100) {
                 $monitorInfo = [PSCustomObject]@{
-                    Name = $monitor.Name
+                    Name      = $monitor.Name
                     MonitorID = $monitor.'Monitor ID'
-                    Action = 'dim'
-                    DimLevel = $dimLevel
+                    Action    = 'dim'
+                    DimLevel  = $dimLevel
                 }
                 [void]$configuredMonitors.Add($monitorInfo)
                 Write-Host "  -> " -ForegroundColor Gray -NoNewline
@@ -324,16 +325,14 @@ Write-Host "--- Step 3: Set Idle Timer ---" -ForegroundColor Cyan
 Write-Host "A single timer will be used for all actions." -ForegroundColor White
 while ($true) {
     # We use Write-Host with -NoNewline to color the prompt for Read-Host.
-    Write-Host "Enter the idle time in minutes (e.g., 30, 1.5): " -NoNewline -ForegroundColor Green
-    $time_min_str = Read-Host
+    Write-Host "Enter the idle time in milliseconds (e.g., 30000 for 30s): " -NoNewline -ForegroundColor Green
+    $time_ms_str = Read-Host
 
-    $culture = [System.Globalization.CultureInfo]::InvariantCulture
-    if ([double]::TryParse($time_min_str, [System.Globalization.NumberStyles]::Float, $culture, [ref]$time_min)) {
-        $time_ms = [math]::Round($time_min * 60000)
+    if ([int]::TryParse($time_ms_str, [ref]$time_ms) -and $time_ms -gt 0) { 
         break
     }
     else {
-        Write-Host "Invalid input. Please enter a number." -ForegroundColor Red
+        Write-Host "Invalid input. Please enter a positive integer (milliseconds)." -ForegroundColor Red
     }
 }
 
@@ -418,7 +417,9 @@ if ($configuredMonitors.Count -gt 0) {
     $argumentParts = $configuredMonitors | ForEach-Object {
         if ($_.Action -eq 'blackout') {
             "$($_.Name):blackout"
-        } else { # dim
+        }
+        else {
+            # dim
             "$($_.Name):dim:$($_.DimLevel)"
         }
     }
@@ -427,7 +428,8 @@ if ($configuredMonitors.Count -gt 0) {
     Start-Process -FilePath $sleeperAhkPath -ArgumentList """$finalArgumentString""", "$time_ms"
     Write-Host "$checkEmoji OLED Sleeper: " -ForegroundColor Gray -NoNewline
     Write-Host "Started for $($configuredMonitors.Count) monitor(s)." -ForegroundColor Green
-} else {
+}
+else {
     Write-Host "No valid actions were configured. Nothing to start." -ForegroundColor Yellow
 }
 

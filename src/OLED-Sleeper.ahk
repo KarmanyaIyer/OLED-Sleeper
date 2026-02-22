@@ -161,6 +161,10 @@ return
 ; ==============================================================================
 
 CheckAllMonitors(*) {
+    global isPaused
+    if isPaused ; Skip check if paused
+        return
+
     CoordMode("Mouse", "Screen") ; Get mouse position relative to full screen
     MouseGetPos(&mx, &my)
 
@@ -230,6 +234,41 @@ CheckAllMonitors(*) {
     }
 }
 
+; HOTKEY TO TOGGLE SLEEPER
+global isPaused := false
+
++#F23:: ; lenovo Copilot key to toggle pause/resume
+{
+    global isPaused
+    isPaused := !isPaused
+
+    if isPaused {
+        Log("Sleeper feature paused by hotkey. Restoring brightness/overlay.")
+        ; Restore everything like activity occurred
+        for screen in MonitoredScreens {
+            if screen['IsModified'] {
+                if (screen['Action'] = "dim") {
+                    SetBrightness(screen['ID'], screen['OriginalBrightness'])
+                } else {
+                    screen['Gui'].Hide()
+                    SetBrightness(screen['ID'], screen['OriginalBrightness'])
+                }
+                screen['IsModified'] := false
+                ClearRestoreState(screen['ID'])
+            }
+        }
+        MsgBox("OLED-Sleeper Paused.", "OLED-Sleeper", "T1")
+    } else {
+        Log("Sleeper feature resumed by hotkey.")
+        ; Reset activity times
+        for screen in MonitoredScreens {
+            screen['LastActiveTime'] := A_TickCount
+        }
+        MsgBox("OLED-Sleeper Resumed.", "OLED-Sleeper", "T1")
+    }
+}
+
+
 
 ; ==============================================================================
 ; HELPER FUNCTIONS — Wrappers for external monitor tools
@@ -239,7 +278,7 @@ CheckAllMonitors(*) {
 SetBrightness(monitorID, brightness) {
     global ControlTool
     cmd := Format('"{1}" /SetValue "{2}\Monitor0" 10 {3}', ControlTool, monitorID, brightness)
-    RunWait(cmd,, "Hide")
+    Run(cmd,, "Hide") ; Using Run instead of RunWait for near instant change
 }
 
 ; Gets the current brightness of a monitor
