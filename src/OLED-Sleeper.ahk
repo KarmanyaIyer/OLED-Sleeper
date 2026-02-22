@@ -253,8 +253,8 @@ CheckAllMonitors(*) {
                     SetBrightness(screen['ID'], screen['OriginalBrightness'])
                 }
                 screen['IsModified'] := false
-                ClearRestoreState(screen['ID'])
             }
+        }
         TrayTip("OLED-Sleeper Paused", "OLED-Sleeper")
     } else {
         Log("Sleeper feature resumed by hotkey.")
