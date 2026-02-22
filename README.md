@@ -6,8 +6,10 @@ Modifications:
 - Made the dimming and brightening instant
 
 
+===============================================================================================================================
 
 Original Repo: https://github.com/Quorthon13/OLED-Sleeper
+
 Original Description below:
 
 # OLED Sleeper 😴 – Blackout or Dim Secondary Monitors on Windows
